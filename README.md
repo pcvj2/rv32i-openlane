@@ -1,6 +1,6 @@
 # RV32I RISC-V Processor Core
 
-A 3-stage pipelined RV32I processor core in SystemVerilog with complete RTL-to-GDSII ASIC flow using OpenLane 2 and the SkyWater 130nm PDK. Includes self-checking testbench, architectural assertions, and functional coverage infrastructure.
+A 3-stage pipelined RV32I processor core in SystemVerilog with complete RTL-to-GDSII ASIC flow using OpenLane 2 and the SkyWater 130nm PDK. Includes AXI4-Lite master interface, constrained random verification, architectural assertions, and functional coverage.
 
 ![GDSII Layout](docs/layout.png)
 *Physical layout of rv32i_top — SkyWater 130nm, 462 × 472 µm die*
@@ -18,7 +18,9 @@ A 3-stage pipelined RV32I processor core in SystemVerilog with complete RTL-to-G
 | Power @ 100 MHz | 20.8 mW |
 | DRC / LVS | Clean ✅ |
 | Assertions | 20 checks, all passing |
-| Functional coverage | 89% (45 bins across 3 tests) |
+| Functional coverage | 91% (45 bins across 3 tests) |
+| Constrained random | 100/100 tests passing |
+| AXI4-Lite | Master interface, verified at multiple latencies |
 
 ## Architecture
 
@@ -54,8 +56,11 @@ Synthesised using OpenLane 2 with the `sky130_fd_sc_hd` standard cell library ac
 | Core utilisation | 50.0% | 51.9% |
 | DRC | Clean | Clean |
 | LVS | Clean | Clean |
+| Antenna violations | 41 nets | 51 nets |
 
 The critical path is approximately 9.1 ns at the typical corner, giving a theoretical Fmax of ~110 MHz. At worst-case conditions (slow-slow, 100°C, 1.6V), the maximum achievable frequency is approximately 57 MHz.
+
+Antenna repair was not enabled in this flow; violations do not affect functional correctness or STA results.
 
 ## Verification
 
@@ -81,7 +86,7 @@ Procedural assertions run on every clock cycle and verify:
 
 All 20 assertions pass across all three test programs with zero failures.
 
-### Functional Coverage (45 bins, 89% combined)
+### Functional Coverage (45 bins, 91% combined)
 
 | Category | Bins | Combined Hit Rate |
 |----------|------|-------------------|
@@ -93,6 +98,34 @@ All 20 assertions pass across all three test programs with zero failures.
 
 Coverage gaps: FENCE and SYSTEM instructions (treated as NOP, not exercised), PASS_B ALU op (internal to LUI), BLTU not-taken.
 
+### Constrained Random Testing (100/100 passing)
+
+A Python-based framework (`rv32i_random_test.py`) that generates random but legal RV32I programs and compares execution between a Python reference model and RTL simulation.
+
+- **Random program generator:** Weighted instruction mix (30% R-type, 20% I-ALU, 12% loads, 10% stores, 10% branches, etc.) with constraints for valid opcodes, safe memory addresses, and bounded forward-only branches.
+- **Python reference model:** Full RV32I ISA simulator used as golden reference.
+- **Automatic comparison:** All 32 registers compared after execution; mismatches reported with seed for reproducibility.
+
+```bash
+cd sim
+python3 rv32i_random_test.py --num-tests 100 --seed 42
+```
+
+## AXI4-Lite Interface
+
+An AXI4-Lite master bridge (`rv32i_axi_master.sv`) wraps the core for SoC-compatible data bus integration. The instruction port remains tightly coupled for single-cycle fetch.
+
+- **5-state FSM:** IDLE → RD_ADDR → RD_DATA for reads; IDLE → WR_ADDR → WR_RESP for writes.
+- **Simultaneous AW+W handshake** with independent completion tracking.
+- **Pipeline stall integration:** Core freezes via `stall_in` during multi-cycle AXI transactions.
+- **Latency tolerant:** Verified at 1-cycle and 3-cycle slave response latencies.
+
+| Test | Direct (cycles) | AXI lat=1 (cycles) |
+|------|----------------|---------------------|
+| test_alu | 83 | 84 |
+| test_branch | 57 | 58 |
+| test_mem | 68 | 171 |
+
 ## Project Structure
 
 ```
@@ -103,11 +136,15 @@ rv32i-openlane/
 │   ├── rv32i_regfile.sv        # 32×32 register file with write-forwarding
 │   ├── rv32i_imm_gen.sv        # Immediate extraction (I/S/B/U/J formats)
 │   ├── rv32i_control.sv        # Instruction decoder
-│   └── rv32i_top.sv            # Top-level pipelined datapath
+│   ├── rv32i_top.sv            # Top-level pipelined datapath
+│   └── rv32i_axi_master.sv     # AXI4-Lite master bridge
 ├── sim/                        # Simulation and verification
-│   ├── rv32i_tb.sv             # Self-checking testbench
+│   ├── rv32i_tb.sv             # Self-checking testbench (direct memory)
+│   ├── rv32i_axi_tb.sv         # AXI-Lite integration testbench
+│   ├── rv32i_axi_mem.sv        # AXI-Lite slave memory model
 │   ├── rv32i_sva.sv            # Architectural assertions (20 checks)
 │   ├── rv32i_fcov.sv           # Functional coverage (45 bins)
+│   ├── rv32i_random_test.py    # Constrained random test framework
 │   ├── rv32i_mem.sv            # Simulation memory model (64 KB)
 │   ├── rv32i_asm.py            # Python RV32I assembler
 │   └── Makefile                # Build and run automation
@@ -173,10 +210,11 @@ Results are written to `openlane/runs/<tag>/final/` including GDSII, gate-level 
 - [x] RTL design (3-stage pipeline)
 - [x] Basic test suite (ALU, branches, memory)
 - [x] Architectural assertions (20 procedural checks)
-- [x] Functional coverage (45 bins, 89% combined)
+- [x] Functional coverage (45 bins, 91% combined)
+- [x] Constrained random testing (100/100 passing)
+- [x] AXI4-Lite memory interface
 - [x] OpenLane synthesis + PPA at 50 MHz and 100 MHz
-- [ ] Constrained random testing
-- [ ] AXI-Lite memory interface
+- [x] Full documentation
 
 ## License
 
