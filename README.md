@@ -167,22 +167,34 @@ rv32i-openlane/
 sudo apt install -y iverilog python3 make
 ```
 
-### Run All Tests
+### Run All Tests (direct memory)
 
 ```bash
 cd sim
 make run_all
 ```
 
-This assembles each test program, runs simulation, and prints pass/fail with assertion and coverage reports.
+### Run All Tests (AXI-Lite interface)
+
+```bash
+cd sim
+make run_axi_all
+```
+
+### Constrained Random Testing
+
+```bash
+cd sim
+make random                          # 100 tests, seed=42
+make random RANDOM_N=500 RANDOM_SEED=123  # custom
+```
 
 ### Run a Single Test
 
 ```bash
 cd sim
-python3 rv32i_asm.py ../programs/test_alu.s test_alu.hex
-cp test_alu.hex program.hex
-make sim
+make run_test_alu        # direct memory
+make run_axi_test_mem    # via AXI-Lite
 ```
 
 ### ASIC Synthesis (requires Docker + OpenLane 2)
