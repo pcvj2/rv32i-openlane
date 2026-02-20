@@ -18,7 +18,7 @@ A 3-stage pipelined RV32I processor core in SystemVerilog with complete RTL-to-G
 | Power @ 100 MHz | 20.8 mW |
 | DRC / LVS | Clean ✅ |
 | Assertions | 20 checks, all passing |
-| Functional coverage | 91% (45 bins across 3 tests) |
+| Functional coverage | 91% (41/45 bins across 3 tests) |
 | Constrained random | 100/100 tests passing |
 | AXI4-Lite | Master interface, verified at multiple latencies |
 
