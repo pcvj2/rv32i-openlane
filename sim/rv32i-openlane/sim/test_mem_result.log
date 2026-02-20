@@ -1,0 +1,94 @@
+WARNING: rv32i_mem.sv:37: $readmemh(program.hex): Not enough words in the file for the requested range [0:16383].
+VCD info: dumpfile rv32i_tb.vcd opened for output.
+*** PASS *** (cycle 68)
+
+========================================
+  ASSERTION SUMMARY
+========================================
+  Checks passed: 468
+  Checks failed: 0
+  Result: ALL ASSERTIONS PASSED
+========================================
+
+========================================
+  FUNCTIONAL COVERAGE REPORT
+========================================
+
+--- Instruction Types ---
+  R-type:   MISS
+  I-ALU:     HIT
+  Load:      HIT
+  Store:     HIT
+  Branch:    HIT
+  JAL:      MISS
+  JALR:     MISS
+  LUI:       HIT
+  AUIPC:    MISS
+  FENCE:    MISS
+  SYSTEM:   MISS
+
+--- ALU Operations ---
+  ADD=1 SUB=0 SLL=0 SLT=0 SLTU=0
+  XOR=0 SRL=0 SRA=0 OR=0  AND=0 PASS_B=0
+
+--- Branch Directions (taken/not-taken) ---
+  BEQ:  T=0 NT=0
+  BNE:  T=0 NT=1
+  BLT:  T=0 NT=0
+  BGE:  T=0 NT=0
+  BLTU: T=0 NT=0
+  BGEU: T=0 NT=0
+
+--- Memory Access Widths ---
+  Load:  byte=1 half=1 word=1
+  Store: byte=1 half=1 word=1
+
+--- Hazard Scenarios ---
+  Load-use stall:     HIT
+  Branch flush:      MISS
+  JAL flush:         MISS
+  JALR flush:        MISS
+  Load→branch:        HIT
+
+--- Register Usage ---
+  rd written: 8/31 registers
+  rs1 read:   10/32 registers
+  rs2 read:   17/32 registers
+
+========================================
+  TOTAL COVERAGE: 15 / 45 bins (33%)
+========================================
+
+REGDUMP x0 00000000
+REGDUMP x1 00000001
+REGDUMP x2 00000014
+REGDUMP x3 0000001e
+REGDUMP x4 0000000a
+REGDUMP x5 00000014
+REGDUMP x6 0000001e
+REGDUMP x7 00000000
+REGDUMP x8 00000000
+REGDUMP x9 00000000
+REGDUMP x10 00000000
+REGDUMP x11 00000000
+REGDUMP x12 00000000
+REGDUMP x13 00000000
+REGDUMP x14 00000000
+REGDUMP x15 00000000
+REGDUMP x16 00000000
+REGDUMP x17 00000000
+REGDUMP x18 00000000
+REGDUMP x19 00000000
+REGDUMP x20 00000000
+REGDUMP x21 00000000
+REGDUMP x22 00000000
+REGDUMP x23 00000000
+REGDUMP x24 00000000
+REGDUMP x25 00000000
+REGDUMP x26 00000000
+REGDUMP x27 00000000
+REGDUMP x28 00000000
+REGDUMP x29 00000000
+REGDUMP x30 00002000
+REGDUMP x31 fffffff0
+rv32i_tb.sv:167: $finish called at 745000 (1ps)
