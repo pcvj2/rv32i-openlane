@@ -1,0 +1,9 @@
+# Build artifacts
+*.vcd
+*_result.log
+*_axi_result.log
+sim/rv32i_sim
+sim/rv32i_axi_sim
+sim/program.hex
+sim/*.hex
+openlane/runs/
